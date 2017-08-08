@@ -93,6 +93,7 @@ export function initMixin (Vue: Class<Component>) {
     }
 
     // 如果options中设置了el, 则装载el
+    // $mount在最外层runtime中定义，根据平台不同有实现区别
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }

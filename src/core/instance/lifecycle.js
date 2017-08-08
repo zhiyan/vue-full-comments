@@ -1,7 +1,9 @@
 /**
  * 生命周期模块
  * 导出:
- *   * callHook, 生命周期调用方法
+ *   * lifecycleMixin: Vue.prototype的生命周期包装函数
+ *   * initLifecycle: vue实例的生命周期包装函数
+ *   * callHook: 生命周期调用方法
  */
 
 /* @flow */
@@ -321,7 +323,7 @@ export function deactivateChildComponent (vm: Component, direct?: boolean) {
 export function callHook (vm: Component, hook: string) {
   const handlers = vm.$options[hook]
 
-  // 循环执行周期函数句柄
+  // 循环执行周期函数句柄, options[lifecycleName]是一个数组
   if (handlers) {
     for (let i = 0, j = handlers.length; i < j; i++) {
       try {

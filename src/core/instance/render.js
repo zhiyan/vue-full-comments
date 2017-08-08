@@ -1,3 +1,10 @@
+/**
+ * render模块
+ * 导出:
+ *   * renderMixin: Vue.prototype的包装函数
+ *   * initRender: vue实例的包装函数
+ */
+
 /* @flow */
 
 import {
@@ -30,6 +37,7 @@ import { renderStatic, markOnce } from './render-helpers/render-static'
 import { bindObjectListeners } from './render-helpers/bind-object-listeners'
 import { resolveSlots, resolveScopedSlots } from './render-helpers/resolve-slots'
 
+// vue实例初始化时，有关render模块的一系列处理
 export function initRender (vm: Component) {
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null
@@ -63,6 +71,10 @@ export function initRender (vm: Component) {
   }
 }
 
+// Vue原型链增加一系列方法
+// $nextTick: util中实现的promise队列
+// _render
+// 其它内部方法
 export function renderMixin (Vue: Class<Component>) {
   Vue.prototype.$nextTick = function (fn: Function) {
     return nextTick(fn, this)

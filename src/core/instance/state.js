@@ -1,3 +1,10 @@
+/**
+ * 数据模块
+ * 导出:
+ *   * stateMixin: Vue.prototype的state包装函数
+ *   * initState: vue实例的state包装函数
+ */
+
 /* @flow */
 
 import config from '../config'
@@ -33,6 +40,8 @@ const sharedPropertyDefinition = {
   set: noop
 }
 
+
+// 使用Object.defineProperty重新定义属性, 设置get/set过程
 export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
@@ -43,17 +52,33 @@ export function proxy (target: Object, sourceKey: string, key: string) {
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
+// vue实例包装函数
+// 1. 初始化实例props
+// 2. 初始化实例methods
+// 3. 初始化实例data
+// 4. 初始化实例computed
+// 5. 初始化实例watch
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
+
+  // props初始化
   if (opts.props) initProps(vm, opts.props)
+
+  // methods初始化
   if (opts.methods) initMethods(vm, opts.methods)
+
+  // data没传也需要初始化，设为空对象{}， 执行监测
   if (opts.data) {
     initData(vm)
   } else {
     observe(vm._data = {}, true /* asRootData */)
   }
+
+  // 计算属性初始化
   if (opts.computed) initComputed(vm, opts.computed)
+
+  // watch初始化
   if (opts.watch && opts.watch !== nativeWatch) {
     initWatch(vm, opts.watch)
   }
@@ -69,6 +94,7 @@ function checkOptionType (vm: Component, name: string) {
   }
 }
 
+// 初始化props函数
 function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
   const props = vm._props = {}
@@ -113,7 +139,10 @@ function initProps (vm: Component, propsOptions: Object) {
   observerState.shouldConvert = true
 }
 
+// 初始化数据函数
 function initData (vm: Component) {
+  // 设置vue._data
+  // 如果options.data是对象，直接赋值，如果是函数，执行getData方法
   let data = vm.$options.data
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
@@ -126,6 +155,7 @@ function initData (vm: Component) {
       vm
     )
   }
+
   // proxy data on instance
   const keys = Object.keys(data)
   const props = vm.$options.props
@@ -133,6 +163,8 @@ function initData (vm: Component) {
   let i = keys.length
   while (i--) {
     const key = keys[i]
+
+    // 开发环境，如果重复定义相同data和methods，则提示warning
     if (process.env.NODE_ENV !== 'production') {
       if (methods && hasOwn(methods, key)) {
         warn(
@@ -141,6 +173,8 @@ function initData (vm: Component) {
         )
       }
     }
+
+    // 开发环境，如果重复定义props和data相同属性，则提示warning
     if (props && hasOwn(props, key)) {
       process.env.NODE_ENV !== 'production' && warn(
         `The data property "${key}" is already declared as a prop. ` +
@@ -148,13 +182,18 @@ function initData (vm: Component) {
         vm
       )
     } else if (!isReserved(key)) {
+      // isReserved检测key是不是以$或_开头，只有飞保留的属性，才执行proxy重新设置defineProperty
       proxy(vm, `_data`, key)
     }
   }
+
+  // 开始观察数据
   // observe data
   observe(data, true /* asRootData */)
 }
 
+// 若options.data是对象，用该函数封装获取data过程
+// 将当前实例vm作为this传给dataFn, 使得dataFn中可以直接使用实例的属性, 如props
 function getData (data: Function, vm: Component): any {
   try {
     return data.call(vm)
@@ -166,6 +205,7 @@ function getData (data: Function, vm: Component): any {
 
 const computedWatcherOptions = { lazy: true }
 
+// 初始化计算属性函数
 function initComputed (vm: Component, computed: Object) {
   process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'computed')
   const watchers = vm._computedWatchers = Object.create(null)
@@ -238,6 +278,7 @@ function createComputedGetter (key) {
   }
 }
 
+// 初始化methods函数
 function initMethods (vm: Component, methods: Object) {
   process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'methods')
   const props = vm.$options.props
@@ -261,6 +302,7 @@ function initMethods (vm: Component, methods: Object) {
   }
 }
 
+// 初始化watch函数
 function initWatch (vm: Component, watch: Object) {
   process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'watch')
   for (const key in watch) {
@@ -291,6 +333,13 @@ function createWatcher (
   return vm.$watch(keyOrFn, handler, options)
 }
 
+
+// Vue原型链上增加:
+// $data
+// $props
+// $set
+// $delete
+// $watch
 export function stateMixin (Vue: Class<Component>) {
   // flow somehow has problems with directly declared definition object
   // when using Object.defineProperty, so we have to procedurally build up
