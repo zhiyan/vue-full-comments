@@ -61,6 +61,7 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 // 4. 初始化实例computed
 // 5. 初始化实例watch
 export function initState (vm: Component) {
+  // 设置实例上的_watchers数组用来存储之后生成的watcher实例
   vm._watchers = []
   const opts = vm.$options
 

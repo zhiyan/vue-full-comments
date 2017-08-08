@@ -31,7 +31,11 @@ export default class Watcher {
   id: number;
   deep: boolean;
   user: boolean;
+
+  // lazy模式，v-model.lazy, 见文档:
+  // https://cn.vuejs.org/v2/guide/forms.html#lazy
   lazy: boolean;
+
   sync: boolean;
   dirty: boolean;
   active: boolean;
@@ -49,7 +53,11 @@ export default class Watcher {
     options?: Object
   ) {
     this.vm = vm
+
+    // watcher实例push到vm实例的_watchers数组里
     vm._watchers.push(this)
+
+    // options部分属性强制boolean型
     // options
     if (options) {
       this.deep = !!options.deep
@@ -59,9 +67,16 @@ export default class Watcher {
     } else {
       this.deep = this.user = this.lazy = this.sync = false
     }
+
+    // 回调函数
     this.cb = cb
+
+    // watcher独有uid, 从0递增
     this.id = ++uid // uid for batching
+
+    // watcher状态，是否活跃状态
     this.active = true
+
     this.dirty = this.lazy // for lazy watchers
     this.deps = []
     this.newDeps = []
@@ -70,6 +85,8 @@ export default class Watcher {
     this.expression = process.env.NODE_ENV !== 'production'
       ? expOrFn.toString()
       : ''
+
+    // 设置实力的getter方法
     // parse expression for getter
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
@@ -85,6 +102,8 @@ export default class Watcher {
         )
       }
     }
+
+    // lazy模式值设为undefined, 否则取get函数返回值
     this.value = this.lazy
       ? undefined
       : this.get()
@@ -93,11 +112,13 @@ export default class Watcher {
   /**
    * Evaluate the getter, and re-collect dependencies.
    */
+  // 手机依赖并拿到watcher的动态value
   get () {
     pushTarget(this)
     let value
     const vm = this.vm
     try {
+      // 收集依赖执行getter方法
       value = this.getter.call(vm, vm)
     } catch (e) {
       if (this.user) {
@@ -203,6 +224,7 @@ export default class Watcher {
    * This only gets called for lazy watchers.
    */
   evaluate () {
+  // lazy模式调用的方法， 初始化watcher值，执行evaluate之前，watcher的value为undefined
     this.value = this.get()
     this.dirty = false
   }
