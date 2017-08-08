@@ -1,3 +1,6 @@
+/**
+ * watcher构造函数
+ */
 /* @flow */
 
 import { queueWatcher } from './scheduler'

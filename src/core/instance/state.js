@@ -33,6 +33,8 @@ import {
   isReservedAttribute
 } from '../util/index'
 
+// defineProperty时的公用结构
+// 每次使用前都重设get/set可能会是个坑
 const sharedPropertyDefinition = {
   enumerable: true,
   configurable: true,
@@ -84,6 +86,8 @@ export function initState (vm: Component) {
   }
 }
 
+// 检测数据类型
+// 开发环境下如果computed/method/watch属性为空对象, 则提示warning
 function checkOptionType (vm: Component, name: string) {
   const option = vm.$options[name]
   if (!isPlainObject(option)) {
@@ -129,6 +133,8 @@ function initProps (vm: Component, propsOptions: Object) {
     } else {
       defineReactive(props, key, value)
     }
+
+    // proxy定义_props
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
@@ -208,20 +214,30 @@ const computedWatcherOptions = { lazy: true }
 // 初始化计算属性函数
 function initComputed (vm: Component, computed: Object) {
   process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'computed')
+
+  // 单独开辟_computedWatchers对象，存储计算属性的watchers
   const watchers = vm._computedWatchers = Object.create(null)
 
   for (const key in computed) {
     const userDef = computed[key]
+
+    // 计算属性值若不是函数，取其get值
+    // 参见文档:https://cn.vuejs.org/v2/api/#computed
     const getter = typeof userDef === 'function' ? userDef : userDef.get
+
+    // 开发环境计算属性得不到正确的getter, 报warning
     if (process.env.NODE_ENV !== 'production' && getter == null) {
       warn(
         `Getter is missing for computed property "${key}".`,
         vm
       )
     }
+
+    // 计算属性通过watcher来实现
     // create internal watcher for the computed property.
     watchers[key] = new Watcher(vm, getter || noop, noop, computedWatcherOptions)
 
+    // 对不在vm实例上的key, 执行defineComputed, 否则开发环境下报warning
     // component-defined computed properties are already defined on the
     // component prototype. We only need to define computed properties defined
     // at instantiation here.
@@ -237,20 +253,30 @@ function initComputed (vm: Component, computed: Object) {
   }
 }
 
+// 定义计算属性
 export function defineComputed (target: any, key: string, userDef: Object | Function) {
+  // 计算属性值为函数的情况
   if (typeof userDef === 'function') {
+    // 设置计算属性的getter
     sharedPropertyDefinition.get = createComputedGetter(key)
+    // 计算属性不应该有set, 使用空函数
     sharedPropertyDefinition.set = noop
   } else {
+    // 计算属性是个对象情况：
+    // 1. 设了get， 缓存情况下取get, 不缓存情况下重新创建getter
+    // 2. 没有设get, 为空函数
     sharedPropertyDefinition.get = userDef.get
       ? userDef.cache !== false
         ? createComputedGetter(key)
         : userDef.get
       : noop
+    // 计算属性对象情况下的setter设置
     sharedPropertyDefinition.set = userDef.set
       ? userDef.set
       : noop
   }
+
+  // 开发环境下set为空函数发出warning
   if (process.env.NODE_ENV !== 'production' &&
       sharedPropertyDefinition.set === noop) {
     sharedPropertyDefinition.set = function () {
@@ -260,11 +286,15 @@ export function defineComputed (target: any, key: string, userDef: Object | Func
       )
     }
   }
+
+  // 重新定义计算属性
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
+// 创建计算属性的getter
 function createComputedGetter (key) {
   return function computedGetter () {
+    // 得到当前计算属性的watcher
     const watcher = this._computedWatchers && this._computedWatchers[key]
     if (watcher) {
       if (watcher.dirty) {
@@ -283,7 +313,13 @@ function initMethods (vm: Component, methods: Object) {
   process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'methods')
   const props = vm.$options.props
   for (const key in methods) {
+    // method如果是null, 设为空函数
+    // 否则绑定this到vm, 加到实例上
     vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
+
+    // 开发环境下一下情况提示warning
+    // 1. method值为空
+    // 2. props上定一下同名属性
     if (process.env.NODE_ENV !== 'production') {
       if (methods[key] == null) {
         warn(
@@ -307,6 +343,7 @@ function initWatch (vm: Component, watch: Object) {
   process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'watch')
   for (const key in watch) {
     const handler = watch[key]
+    // watch也可以是一个数组, 如果是数组则循环遍历创建watcher
     if (Array.isArray(handler)) {
       for (let i = 0; i < handler.length; i++) {
         createWatcher(vm, key, handler[i])
@@ -317,16 +354,21 @@ function initWatch (vm: Component, watch: Object) {
   }
 }
 
+// 创建watcher
+// 装饰vm.$watch的参数
 function createWatcher (
   vm: Component,
   keyOrFn: string | Function,
   handler: any,
   options?: Object
 ) {
+  // 处理watch为对象的情况，见文档:
+  // https://cn.vuejs.org/v2/api/#watch
   if (isPlainObject(handler)) {
     options = handler
     handler = handler.handler
   }
+  // 处理watch为字符串情况, 取vm中方法
   if (typeof handler === 'string') {
     handler = vm[handler]
   }
@@ -366,21 +408,30 @@ export function stateMixin (Vue: Class<Component>) {
   Vue.prototype.$set = set
   Vue.prototype.$delete = del
 
+  // 原型链添加$watch
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
     cb: any,
     options?: Object
   ): Function {
     const vm: Component = this
+
+    // 回调函数是对象，参数需要预处理，通过createWatcher来处理
+    // 此处会递归处理
     if (isPlainObject(cb)) {
       return createWatcher(vm, expOrFn, cb, options)
     }
     options = options || {}
     options.user = true
+    // 创建一个watcher, 参数: vm实例，key, 回调函数,options
     const watcher = new Watcher(vm, expOrFn, cb, options)
+
+    // 是否立即执行watch回调
     if (options.immediate) {
       cb.call(vm, watcher.value)
     }
+
+    // 返回解除watch函数
     return function unwatchFn () {
       watcher.teardown()
     }
