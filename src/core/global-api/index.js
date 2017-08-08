@@ -1,3 +1,9 @@
+/**
+ * 用来为Vue添加全局API
+ * 参见：https://cn.vuejs.org/v2/api/#全局-API
+ * 文档中version在入口文件中添加，compile不在此添加，其余全局api全部在该文件添加
+ */
+
 /* @flow */
 // 引入配置文件
 import config from '../config'
@@ -10,10 +16,13 @@ import { initExtend } from './extend'
 // 引入添加component|filter|directive方法
 import { initAssetRegisters } from './assets'
 
+// 引入observer的set, del方法
 import { set, del } from '../observer/index'
+
 // 引入资源类型名数组
 import { ASSET_TYPES } from 'shared/constants'
 
+// 引入内置组件
 import builtInComponents from '../components/index'
 
 import {
@@ -39,6 +48,8 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   }
   Object.defineProperty(Vue, 'config', configDef)
 
+  // 添加Vue.util对象，包含相关工具方法
+  // 非公共api, 不建议使用
   // exposed util methods.
   // NOTE: these are not considered part of the public API - avoid relying on
   // them unless you are aware of the risk.
@@ -74,6 +85,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   // components with in Weex's multi-instance scenarios.
   Vue.options._base = Vue
 
+  // 扩展Vue.options.components, 添加内置组件
   extend(Vue.options.components, builtInComponents)
 
   // 添加Vue.use方法
