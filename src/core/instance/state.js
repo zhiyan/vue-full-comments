@@ -210,6 +210,8 @@ function getData (data: Function, vm: Component): any {
   }
 }
 
+// 计算属性的watcher是lazy模式的
+// lazy模式的watcher手动调用evaluate来手机依赖并得到值
 const computedWatcherOptions = { lazy: true }
 
 // 初始化计算属性函数
@@ -259,6 +261,7 @@ export function defineComputed (target: any, key: string, userDef: Object | Func
   // 计算属性值为函数的情况
   if (typeof userDef === 'function') {
     // 设置计算属性的getter
+    // 并没有真实用到userDef, 创建watcher时已经将回调设置好
     sharedPropertyDefinition.get = createComputedGetter(key)
     // 计算属性不应该有set, 使用空函数
     sharedPropertyDefinition.set = noop
@@ -293,12 +296,19 @@ export function defineComputed (target: any, key: string, userDef: Object | Func
 }
 
 // 创建计算属性的getter
+// getter方法做的事情:
+// 1. 查看当前watcher是否已经dirty
+// 2. 已经dirty的情况下重新收集依赖更新自己的value属性
+// 3. 返回value
 function createComputedGetter (key) {
   return function computedGetter () {
     // 得到当前计算属性的watcher
     const watcher = this._computedWatchers && this._computedWatchers[key]
+
     if (watcher) {
+      // watcher需要脏检查的情况下重新运行evaluate得到值
       if (watcher.dirty) {
+        // evaluate为lazy模式下取值方式
         watcher.evaluate()
       }
       if (Dep.target) {

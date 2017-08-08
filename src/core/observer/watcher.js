@@ -1,5 +1,7 @@
 /**
  * watcher构造函数
+ * watcher用来处理数据变化到响应的触发过程
+ * vue内部的computed属性$watch, 以及v-model底层都是通过watcher来处理的
  */
 /* @flow */
 
@@ -248,12 +250,17 @@ export default class Watcher {
       // this is a somewhat expensive operation so we skip it
       // if the vm is being destroyed.
       if (!this.vm._isBeingDestroyed) {
+        // 将自身从vm实例的watchers数组中移除
         remove(this.vm._watchers, this)
       }
+
+      // 循环移除依赖订阅
       let i = this.deps.length
       while (i--) {
         this.deps[i].removeSub(this)
       }
+
+      // 置为不活跃
       this.active = false
     }
   }
