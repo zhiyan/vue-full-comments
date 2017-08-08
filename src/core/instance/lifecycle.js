@@ -1,3 +1,9 @@
+/**
+ * 生命周期模块
+ * 导出:
+ *   * callHook, 生命周期调用方法
+ */
+
 /* @flow */
 
 import config from '../config'
@@ -20,6 +26,7 @@ import {
 export let activeInstance: any = null
 export let isUpdatingChildComponent: boolean = false
 
+// 添加vue实例私有对象和属性
 export function initLifecycle (vm: Component) {
   const options = vm.$options
 
@@ -307,8 +314,14 @@ export function deactivateChildComponent (vm: Component, direct?: boolean) {
   }
 }
 
+// 生命周期调用方法
+// @param vm 组件
+// @param hook 调用的生命周期名称
+// 生命周期方法都存于组件的$options中
 export function callHook (vm: Component, hook: string) {
   const handlers = vm.$options[hook]
+
+  // 循环执行周期函数句柄
   if (handlers) {
     for (let i = 0, j = handlers.length; i < j; i++) {
       try {
@@ -318,6 +331,8 @@ export function callHook (vm: Component, hook: string) {
       }
     }
   }
+
+  // 如果有钩子事件则执行钩子事件
   if (vm._hasHookEvent) {
     vm.$emit('hook:' + hook)
   }

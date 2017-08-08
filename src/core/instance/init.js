@@ -1,3 +1,7 @@
+/**
+ * 实例化一个vue对象，实际执行的方法: Vue.protoype._init
+ */
+
 /* @flow */
 
 import config from '../config'
@@ -15,6 +19,8 @@ let uid = 0
 export function initMixin (Vue: Class<Component>) {
   Vue.prototype._init = function (options?: Object) {
     const vm: Component = this
+
+    // 为每一个vue实例设置独有的uid, 递增
     // a uid
     vm._uid = uid++
 
@@ -24,10 +30,15 @@ export function initMixin (Vue: Class<Component>) {
       startTag = `vue-perf-init:${vm._uid}`
       endTag = `vue-perf-end:${vm._uid}`
       mark(startTag)
-    }
+    }f
 
     // a flag to avoid this being observed
     vm._isVue = true
+
+    // 合并options
+    // options._isComponent在vdom中定义，标识是否是组件
+    // 组件执行initInternalComponent
+    // 非组件执行mergeOptions->resolveConstructorOptions
     // merge options
     if (options && options._isComponent) {
       // optimize internal component instantiation
@@ -47,15 +58,31 @@ export function initMixin (Vue: Class<Component>) {
     } else {
       vm._renderProxy = vm
     }
+
+    // 设置一个实例自身的引用
+    // TODO
     // expose real self
     vm._self = vm
+
+    // 添加实例生命周期方法
     initLifecycle(vm)
+
+    // 添加事件方法
     initEvents(vm)
+
+    // 添加render方法
     initRender(vm)
+
+    // 执行beforeCreate生命周期函数
     callHook(vm, 'beforeCreate')
+
     initInjections(vm) // resolve injections before data/props
+
     initState(vm)
+
     initProvide(vm) // resolve provide after data/props
+
+    // 执行created生命周期函数
     callHook(vm, 'created')
 
     /* istanbul ignore if */
@@ -65,12 +92,14 @@ export function initMixin (Vue: Class<Component>) {
       measure(`${vm._name} init`, startTag, endTag)
     }
 
+    // 如果options中设置了el, 则装载el
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }
   }
 }
 
+// 如果实例是一个component, 则执行该方法，设置一系列options
 function initInternalComponent (vm: Component, options: InternalComponentOptions) {
   const opts = vm.$options = Object.create(vm.constructor.options)
   // doing this because it's faster than dynamic enumeration.
