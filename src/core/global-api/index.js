@@ -1,11 +1,14 @@
 /* @flow */
-
+// 引入配置文件
 import config from '../config'
+// 引入添加use方法
 import { initUse } from './use'
+// 引入添加mixin方法
 import { initMixin } from './mixin'
 import { initExtend } from './extend'
 import { initAssetRegisters } from './assets'
 import { set, del } from '../observer/index'
+// 引入资源类型名数组
 import { ASSET_TYPES } from 'shared/constants'
 import builtInComponents from '../components/index'
 
@@ -55,8 +58,12 @@ export function initGlobalAPI (Vue: GlobalAPI) {
 
   extend(Vue.options.components, builtInComponents)
 
+  // 添加Vue.use方法
   initUse(Vue)
+  // 添加Vue.mixin方法
   initMixin(Vue)
+  // 添加Vue.extend方法
   initExtend(Vue)
+  // 添加Vue.component| Vue.filter | Vue.directive 等方法
   initAssetRegisters(Vue)
 }

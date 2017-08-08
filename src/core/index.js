@@ -1,3 +1,13 @@
+/**
+ * 入口文件
+ * 1. 引入Vue构造函数
+ * 2. 添加Vue构造函数的相关静态方法(global-api)
+ * 2. 为Vue示例添加$isServer, $ssrContext方法
+ * 3. 添加Vue版本号占位符
+ * 4. 导出Vue构造函数
+ */
+
+
 // 引入`Vue`构造函数
 import Vue from './instance/index'
 // 引入`initGlobalAPI`
