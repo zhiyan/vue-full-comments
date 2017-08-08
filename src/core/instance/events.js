@@ -1,3 +1,10 @@
+/**
+ * 事件模块
+ * 导出:
+ *   * eventsMixin: Vue.prototype的events包装函数
+ *   * initEvents: vue实例的events包装函数
+ */
+
 /* @flow */
 
 import {
@@ -10,8 +17,12 @@ import {
 import { updateListeners } from '../vdom/helpers/index'
 
 export function initEvents (vm: Component) {
+  // 初始化设置实例_events属性
   vm._events = Object.create(null)
+
+  // 是否有钩子事件设为false
   vm._hasHookEvent = false
+
   // init parent attached events
   const listeners = vm.$options._parentListeners
   if (listeners) {
@@ -43,15 +54,23 @@ export function updateComponentListeners (
 }
 
 export function eventsMixin (Vue: Class<Component>) {
+  // 钩子事件的正则匹配
   const hookRE = /^hook:/
+
+  // 实例$on方法
+  // 参考文档: https://cn.vuejs.org/v2/api/#vm-on-event-callback
   Vue.prototype.$on = function (event: string | Array<string>, fn: Function): Component {
     const vm: Component = this
     if (Array.isArray(event)) {
+      // event是数组则递归调用$on
       for (let i = 0, l = event.length; i < l; i++) {
         this.$on(event[i], fn)
       }
     } else {
+      // 实例上注册的事件每一个都是一个数组
       (vm._events[event] || (vm._events[event] = [])).push(fn)
+
+      // 判断当前时间是否是钩子事件，是钩子事件则设置实例的_hasHookEvent属性为true
       // optimize hook:event cost by using a boolean flag marked at registration
       // instead of a hash lookup
       if (hookRE.test(event)) {
@@ -61,6 +80,8 @@ export function eventsMixin (Vue: Class<Component>) {
     return vm
   }
 
+  // $once方法, 实际是调用$on方法
+  // 更改了事件句柄，在原句柄执行前先执行off方法解绑事件
   Vue.prototype.$once = function (event: string, fn: Function): Component {
     const vm: Component = this
     function on () {
@@ -72,13 +93,18 @@ export function eventsMixin (Vue: Class<Component>) {
     return vm
   }
 
+  // $off解绑事件
   Vue.prototype.$off = function (event?: string | Array<string>, fn?: Function): Component {
     const vm: Component = this
+
+    // vm.off() 可以解绑当前实例所有的事件
     // all
     if (!arguments.length) {
       vm._events = Object.create(null)
       return vm
     }
+
+    // events为数组，同时解绑多个事件, 递归调用
     // array of events
     if (Array.isArray(event)) {
       for (let i = 0, l = event.length; i < l; i++) {
@@ -86,15 +112,22 @@ export function eventsMixin (Vue: Class<Component>) {
       }
       return vm
     }
+
+    // 若事件句柄为null, 说明已经解绑，不执行任何操作
     // specific event
     const cbs = vm._events[event]
     if (!cbs) {
       return vm
     }
+
+    // vm.off(xxx) 解绑xxx
+    // 设置实例xxx的事件为null
     if (arguments.length === 1) {
       vm._events[event] = null
       return vm
     }
+
+    // 卸载某一事件多个句柄中的一个
     // specific handler
     let cb
     let i = cbs.length
@@ -108,8 +141,11 @@ export function eventsMixin (Vue: Class<Component>) {
     return vm
   }
 
+  // 触发事件
   Vue.prototype.$emit = function (event: string): Component {
     const vm: Component = this
+
+    // 开发环境对大小写的提示
     if (process.env.NODE_ENV !== 'production') {
       const lowerCaseEvent = event.toLowerCase()
       if (lowerCaseEvent !== event && vm._events[lowerCaseEvent]) {
@@ -122,6 +158,8 @@ export function eventsMixin (Vue: Class<Component>) {
         )
       }
     }
+
+    // 循环调用句柄
     let cbs = vm._events[event]
     if (cbs) {
       cbs = cbs.length > 1 ? toArray(cbs) : cbs

@@ -32,6 +32,7 @@ export let isUpdatingChildComponent: boolean = false
 export function initLifecycle (vm: Component) {
   const options = vm.$options
 
+  // 取得第一个非abstract类型的parent实例, 将当前实例加入到parent的$children数组中
   // locate first non-abstract parent
   let parent = options.parent
   if (parent && !options.abstract) {
@@ -41,12 +42,19 @@ export function initLifecycle (vm: Component) {
     parent.$children.push(vm)
   }
 
+  // 设置$parent
   vm.$parent = parent
+
+  // $root设为最外层的vm对象实例
+  // 取parent的$root属性， 若没有parent则自己就是最外层，取当前实例
   vm.$root = parent ? parent.$root : vm
 
+  // 存储子组件的数组
   vm.$children = []
+
   vm.$refs = {}
 
+  // 组件相关生命周期状态设置初始值
   vm._watcher = null
   vm._inactive = null
   vm._directInactive = false
