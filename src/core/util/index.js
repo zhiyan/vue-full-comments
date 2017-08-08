@@ -1,3 +1,7 @@
+/**
+ * 相关工具方法
+ */
+
 /* @flow */
 
 export * from 'shared/util'

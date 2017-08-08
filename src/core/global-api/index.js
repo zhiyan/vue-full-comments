@@ -5,11 +5,15 @@ import config from '../config'
 import { initUse } from './use'
 // 引入添加mixin方法
 import { initMixin } from './mixin'
+// 引入添加mixin方法
 import { initExtend } from './extend'
+// 引入添加component|filter|directive方法
 import { initAssetRegisters } from './assets'
+
 import { set, del } from '../observer/index'
 // 引入资源类型名数组
 import { ASSET_TYPES } from 'shared/constants'
+
 import builtInComponents from '../components/index'
 
 import {
@@ -21,9 +25,11 @@ import {
 } from '../util/index'
 
 export function initGlobalAPI (Vue: GlobalAPI) {
+  // 设置Vue.config对象
   // config
   const configDef = {}
   configDef.get = () => config
+  // 非生产环境的警告： Vue.config不应该被重新手动赋值
   if (process.env.NODE_ENV !== 'production') {
     configDef.set = () => {
       warn(
@@ -43,10 +49,22 @@ export function initGlobalAPI (Vue: GlobalAPI) {
     defineReactive
   }
 
+  // 添加Vue.set静态方法
   Vue.set = set
+
+  // 添加Vue.delete静态方法
   Vue.delete = del
+
+  // 添加Vue.nextTick静态方法
   Vue.nextTick = nextTick
 
+  // 添加Vue.options属性
+  // Vue.options = {
+  //  components: {},
+  //  filters: {},
+  //  directives: {},
+  //  _base: {Vue Constructor}
+  // }
   Vue.options = Object.create(null)
   ASSET_TYPES.forEach(type => {
     Vue.options[type + 's'] = Object.create(null)

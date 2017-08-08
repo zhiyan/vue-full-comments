@@ -1,3 +1,7 @@
+/**
+ * 为Vue添加静态方法Vue.use
+ */
+
 /* @flow */
 
 import { toArray } from '../util/index'

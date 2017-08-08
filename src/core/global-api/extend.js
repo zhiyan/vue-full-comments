@@ -1,3 +1,7 @@
+/**
+ * 为Vue添加静态方法Vue.extend
+ */
+
 /* @flow */
 
 import { ASSET_TYPES } from 'shared/constants'

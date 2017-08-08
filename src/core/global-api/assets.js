@@ -1,3 +1,8 @@
+/**
+ * 为Vue添加静态方法Vue.filter | Vue.component | Vue.directive
+ * 因多次做相同处理，直接从shared/constrants.js中引入配置数组
+ */
+
 /* @flow */
 
 import config from '../config'
