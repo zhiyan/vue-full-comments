@@ -7,12 +7,16 @@
 /* @flow */
 // 引入配置文件
 import config from '../config'
+
 // 引入添加use方法
 import { initUse } from './use'
+
 // 引入添加mixin方法
 import { initMixin } from './mixin'
+
 // 引入添加mixin方法
 import { initExtend } from './extend'
+
 // 引入添加component|filter|directive方法
 import { initAssetRegisters } from './assets'
 

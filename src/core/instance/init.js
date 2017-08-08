@@ -76,10 +76,15 @@ export function initMixin (Vue: Class<Component>) {
     // 执行beforeCreate生命周期函数
     callHook(vm, 'beforeCreate')
 
+    // 依赖注入
+    // 参考文档: https://cn.vuejs.org/v2/api/#provide-inject
+    // 主要给插件和组件库使用
     initInjections(vm) // resolve injections before data/props
 
+    // 初始化数据相关, data/props
     initState(vm)
 
+    // 同inject
     initProvide(vm) // resolve provide after data/props
 
     // 执行created生命周期函数

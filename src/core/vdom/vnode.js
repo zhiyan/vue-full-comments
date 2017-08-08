@@ -1,3 +1,8 @@
+/**
+ * vnode虚拟dom的类定义
+ * 以及导出vnode相关几个操作方法:
+ */
+
 /* @flow */
 
 export default class VNode {
@@ -64,6 +69,7 @@ export default class VNode {
   }
 }
 
+// 创建空的vnode, 实际上是注释
 export const createEmptyVNode = (text: string = '') => {
   const node = new VNode()
   node.text = text
@@ -71,10 +77,12 @@ export const createEmptyVNode = (text: string = '') => {
   return node
 }
 
+// 创建文本vnode
 export function createTextVNode (val: string | number) {
   return new VNode(undefined, undefined, undefined, String(val))
 }
 
+// clone一个vnode实例
 // optimized shallow clone
 // used for static nodes and slot nodes because they may be reused across
 // multiple renders, cloning them avoids errors when DOM manipulations rely
@@ -98,6 +106,7 @@ export function cloneVNode (vnode: VNode): VNode {
   return cloned
 }
 
+// clone一组vnode
 export function cloneVNodes (vnodes: Array<VNode>): Array<VNode> {
   const len = vnodes.length
   const res = new Array(len)

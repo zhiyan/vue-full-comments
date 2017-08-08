@@ -32,6 +32,7 @@ export function initEvents (vm: Component) {
 
 let target: Component
 
+// 内部使用的快捷on方法
 function add (event, fn, once) {
   if (once) {
     target.$once(event, fn)
@@ -40,6 +41,7 @@ function add (event, fn, once) {
   }
 }
 
+// 内部使用的快捷off方法
 function remove (event, fn) {
   target.$off(event, fn)
 }
