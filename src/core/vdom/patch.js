@@ -1,4 +1,9 @@
 /**
+ * Virtual Dom 核心
+ * 算法基于https://github.com/snabbdom/snabbdom修改
+ */
+
+/**
  * Virtual DOM patching algorithm based on Snabbdom by
  * Simon Friis Vindum (@paldepind)
  * Licensed under the MIT License
