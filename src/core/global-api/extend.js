@@ -1,5 +1,6 @@
 /**
  * 为Vue添加静态方法Vue.extend
+ * https://cn.vuejs.org/v2/api/#Vue-extend-options
  */
 
 /* @flow */

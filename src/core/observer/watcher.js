@@ -114,7 +114,7 @@ export default class Watcher {
   /**
    * Evaluate the getter, and re-collect dependencies.
    */
-  // 手机依赖并拿到watcher的动态value
+  // 收集依赖并拿到watcher的动态value
   get () {
     pushTarget(this)
     let value

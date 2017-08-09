@@ -59,8 +59,12 @@ export function initLifecycle (vm: Component) {
   vm._watcher = null
   vm._inactive = null
   vm._directInactive = false
+
+  // 是否已经加载
   vm._isMounted = false
+  // 是否已经被卸载
   vm._isDestroyed = false
+  // 是否正在被卸载, 因为有异步处理
   vm._isBeingDestroyed = false
 }
 

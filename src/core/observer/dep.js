@@ -42,6 +42,7 @@ export default class Dep {
   }
 }
 
+// 当前正在执行的watcher
 // the current target watcher being evaluated.
 // this is globally unique because there could be only one
 // watcher being evaluated at any time.

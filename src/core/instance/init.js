@@ -5,6 +5,7 @@
 /* @flow */
 
 import config from '../config'
+// proxy只是开发环境中用到
 import { initProxy } from './proxy'
 import { initState } from './state'
 import { initRender } from './render'
@@ -46,6 +47,7 @@ export function initMixin (Vue: Class<Component>) {
       // internal component options needs special treatment.
       initInternalComponent(vm, options)
     } else {
+      // 设置实例的$options
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
@@ -57,6 +59,7 @@ export function initMixin (Vue: Class<Component>) {
     if (process.env.NODE_ENV !== 'production') {
       initProxy(vm)
     } else {
+      // 非开发环境renderProxy指向实例自己
       vm._renderProxy = vm
     }
 
@@ -123,8 +126,18 @@ function initInternalComponent (vm: Component, options: InternalComponentOptions
   }
 }
 
+
+// 拿到Vue构造函数的公共options
 export function resolveConstructorOptions (Ctor: Class<Component>) {
+  // 得到构造函数的静态属性options
+  // 该属性在global-api中添加
   let options = Ctor.options
+
+  // 是否继承了父级Class
+  // 比如通过Vue.extend方法创造的实例
+  // 继承了父级Class, 则super指向父级构造函数，此处拿到父级构造函数的options
+  // 做了cache判断，如果已经有superOptions属性，说明已经将父级options赋给过当前Class
+  // 如果没有，则将父级options赋给当前构造函数的superOptions属性
   if (Ctor.super) {
     const superOptions = resolveConstructorOptions(Ctor.super)
     const cachedSuperOptions = Ctor.superOptions
@@ -138,15 +151,21 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
       if (modifiedOptions) {
         extend(Ctor.extendOptions, modifiedOptions)
       }
+      // 合并extendOptions和父级options作为当前构造函数的options
       options = Ctor.options = mergeOptions(superOptions, Ctor.extendOptions)
+
+      // 如果设置了组件名，在options.components组件列表中添加引用
       if (options.name) {
         options.components[options.name] = Ctor
       }
     }
   }
+
   return options
 }
 
+
+// 以下两个函数都是为解决#4976，额外对options做的处理
 function resolveModifiedOptions (Ctor: Class<Component>): ?Object {
   let modified
   const latest = Ctor.options

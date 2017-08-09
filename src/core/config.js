@@ -58,6 +58,7 @@ export default ({
   devtools: process.env.NODE_ENV !== 'production',
 
   /**
+   * 是否做性能报告
    * Whether to record perf
    */
   performance: false,
