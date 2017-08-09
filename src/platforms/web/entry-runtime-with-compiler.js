@@ -1,3 +1,8 @@
+/**
+ * 该文件编译出 vue.js
+ * 包含runtime+compile
+ */
+
 /* @flow */
 
 import config from 'core/config'
