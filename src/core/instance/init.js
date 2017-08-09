@@ -30,7 +30,7 @@ export function initMixin (Vue: Class<Component>) {
       startTag = `vue-perf-init:${vm._uid}`
       endTag = `vue-perf-end:${vm._uid}`
       mark(startTag)
-    }f
+    }
 
     // a flag to avoid this being observed
     vm._isVue = true
@@ -52,6 +52,7 @@ export function initMixin (Vue: Class<Component>) {
         vm
       )
     }
+
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
       initProxy(vm)
@@ -60,7 +61,6 @@ export function initMixin (Vue: Class<Component>) {
     }
 
     // 设置一个实例自身的引用
-    // TODO
     // expose real self
     vm._self = vm
 

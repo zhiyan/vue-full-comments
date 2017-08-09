@@ -64,16 +64,21 @@ export function initLifecycle (vm: Component) {
 }
 
 export function lifecycleMixin (Vue: Class<Component>) {
+
+  // 组件更新操作
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
+    // 已经装载情况下执行beforeUpdate钩子
     if (vm._isMounted) {
       callHook(vm, 'beforeUpdate')
     }
+
     const prevEl = vm.$el
     const prevVnode = vm._vnode
     const prevActiveInstance = activeInstance
     activeInstance = vm
     vm._vnode = vnode
+
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
     if (!prevVnode) {
@@ -106,25 +111,40 @@ export function lifecycleMixin (Vue: Class<Component>) {
     // updated in a parent's updated hook.
   }
 
+  // 强制更新操作
   Vue.prototype.$forceUpdate = function () {
     const vm: Component = this
+    // 实际执行的实例watcher的update方法
     if (vm._watcher) {
       vm._watcher.update()
     }
   }
 
+  // vue实例销毁函数
   Vue.prototype.$destroy = function () {
     const vm: Component = this
+
+    // 防止重复执行
     if (vm._isBeingDestroyed) {
       return
     }
+
+    // 调用beforeDestroy的钩子
     callHook(vm, 'beforeDestroy')
+
+    // 设置正在销毁tag
     vm._isBeingDestroyed = true
+
+    // 将实例从父组件中移除
+    // 从父组件$children数组中移除
+    // 实例不能使abstract类型, 且有父组件存在
     // remove self from parent
     const parent = vm.$parent
     if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
       remove(parent.$children, vm)
     }
+
+    // 卸载watcher
     // teardown watchers
     if (vm._watcher) {
       vm._watcher.teardown()
@@ -133,19 +153,29 @@ export function lifecycleMixin (Vue: Class<Component>) {
     while (i--) {
       vm._watchers[i].teardown()
     }
+
     // remove reference from data ob
     // frozen object may not have observer.
     if (vm._data.__ob__) {
       vm._data.__ob__.vmCount--
     }
+
+    // 设置标志位，是否已经卸载
     // call the last hook...
     vm._isDestroyed = true
+
+
     // invoke destroy hooks on current rendered tree
     vm.__patch__(vm._vnode, null)
+
+    // 调用destroyed钩子
     // fire destroyed hook
     callHook(vm, 'destroyed')
+
+    // 解绑所有事件监听
     // turn off all instance listeners.
     vm.$off()
+
     // remove __vue__ reference
     if (vm.$el) {
       vm.$el.__vue__ = null
@@ -153,12 +183,17 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
+// 对外导出的装载函数
+// 只有runtime的vue才打包该函数作为vm.$mount
 export function mountComponent (
   vm: Component,
   el: ?Element,
   hydrating?: boolean
 ): Component {
+  // $el设为装载元素
   vm.$el = el
+
+  // 如果options中没有设置render方法，则render指定为createEmptyVNode
   if (!vm.$options.render) {
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {
@@ -179,6 +214,8 @@ export function mountComponent (
       }
     }
   }
+
+  // 调用beforeMount钩子
   callHook(vm, 'beforeMount')
 
   let updateComponent
@@ -212,7 +249,9 @@ export function mountComponent (
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
   if (vm.$vnode == null) {
+    // 设置已装载标志位
     vm._isMounted = true
+    // 调用已装载钩子
     callHook(vm, 'mounted')
   }
   return vm
