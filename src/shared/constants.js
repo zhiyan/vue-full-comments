@@ -1,3 +1,5 @@
+// 公用常量
+
 // ssr服务端渲染的属性名
 export const SSR_ATTR = 'data-server-rendered'
 

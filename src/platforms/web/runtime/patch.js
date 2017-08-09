@@ -1,3 +1,7 @@
+/**
+ * 为Vue.prototype.__patch__提供方法
+ * 实际方法在vdom/patch中
+ */
 /* @flow */
 
 import * as nodeOps from 'web/runtime/node-ops'

@@ -1,3 +1,12 @@
+/**
+ * runtime版vue
+ * 1. 为vue扩展了内置directives
+ * 2. 扩展了compnents
+ * 3. 设置了平台相关的配置
+ * 4. 添加__patch__方法
+ * 5. 添加$mount方法
+ */
+
 /* @flow */
 
 import Vue from 'core/index'

@@ -194,6 +194,8 @@ export function mountComponent (
   vm.$el = el
 
   // 如果options中没有设置render方法，则render指定为createEmptyVNode
+  // render函数肯定会有，预编译的编译好后就有render, 非预编译的$mount装载时compile成render
+  // 除非实时编译的，却引入了runtime版本的vue, 则在开发环境下作提示
   if (!vm.$options.render) {
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {
@@ -218,6 +220,7 @@ export function mountComponent (
   // 调用beforeMount钩子
   callHook(vm, 'beforeMount')
 
+  // 测试环境会在update前后输出一系列console, 所以与生产环境updateComponent设置不同
   let updateComponent
   /* istanbul ignore if */
   if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
@@ -238,11 +241,13 @@ export function mountComponent (
       measure(`${name} patch`, startTag, endTag)
     }
   } else {
+    // 设置更新组建函数
     updateComponent = () => {
       vm._update(vm._render(), hydrating)
     }
   }
 
+  // 对实例开启watcher, 回调设置为updateComponent
   vm._watcher = new Watcher(vm, updateComponent, noop)
   hydrating = false
 
