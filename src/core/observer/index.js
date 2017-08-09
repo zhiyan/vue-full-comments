@@ -26,6 +26,10 @@ export const observerState = {
 }
 
 /**
+ * Observer类
+ * 每个需要监测改变的对象都要生成一个Oberver实例
+ * Observer实例将该对象的的属性转化为getter/setter方式
+ * 收集对象的依赖，并派发update操作
  * Observer class that are attached to each observed
  * object. Once attached, the observer converts target
  * object's property keys into getter/setters that
@@ -40,7 +44,13 @@ export class Observer {
     this.value = value
     this.dep = new Dep()
     this.vmCount = 0
+
+    // 设置对象__ob__为observer实例引用
     def(value, '__ob__', this)
+
+    // 数组和对象分别处理
+    // 数组通过observeArray
+    // 对象通过walk
     if (Array.isArray(value)) {
       const augment = hasProto
         ? protoAugment
@@ -53,6 +63,7 @@ export class Observer {
   }
 
   /**
+   * Walk方法遍历对象所有属性，挨个通过defineReactive方法转化为getter/setter
    * Walk through each property and convert them into
    * getter/setters. This method should only be called when
    * value type is Object.
@@ -65,6 +76,7 @@ export class Observer {
   }
 
   /**
+   * 数组要遍历每个元素，单独为每个元素创建observer
    * Observe a list of Array items.
    */
   observeArray (items: Array<any>) {
@@ -99,6 +111,7 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
 }
 
 /**
+ * 为一个对象创建observer实例
  * Attempt to create an observer instance for a value,
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
@@ -108,6 +121,9 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     return
   }
   let ob: Observer | void
+
+  // 对象如果有__ob__属性，且__ob__是Observer的实例, 则已经生成过observe
+  // 无需重新生成
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     ob = value.__ob__
   } else if (
@@ -135,6 +151,7 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+  // 创建依赖实例
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
@@ -142,15 +159,20 @@ export function defineReactive (
     return
   }
 
+  // 如果已经定义了geter/setter方法， 缓存起来
   // cater for pre-defined getter/setters
   const getter = property && property.get
   const setter = property && property.set
 
+  // shallow是否浅层监测
+  // 非shallow重新调用observe
+  // observe方法中会对是否已经监测做判断， 不会重复执行
   let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
+      // 有getter方法， 则先通过之前的getter方法拿到值
       const value = getter ? getter.call(obj) : val
       if (Dep.target) {
         dep.depend()
@@ -173,12 +195,17 @@ export function defineReactive (
       if (process.env.NODE_ENV !== 'production' && customSetter) {
         customSetter()
       }
+
+      // 之前有setter方法，执行setter方法, 否则直接赋值
       if (setter) {
         setter.call(obj, newVal)
       } else {
         val = newVal
       }
+      // 从新监测新值，是因为新值可能变成一个新的对象, 那么之前的observer就没有了
       childOb = !shallow && observe(newVal)
+
+      // 通知订阅改value的watcher进行update操作
       dep.notify()
     }
   })

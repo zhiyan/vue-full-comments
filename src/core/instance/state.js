@@ -189,7 +189,7 @@ function initData (vm: Component) {
         vm
       )
     } else if (!isReserved(key)) {
-      // isReserved检测key是不是以$或_开头，只有飞保留的属性，才执行proxy重新设置defineProperty
+      // isReserved检测key是不是以$或_开头，只有非保留的属性，才执行proxy重新设置defineProperty
       proxy(vm, `_data`, key)
     }
   }
