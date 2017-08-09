@@ -4,6 +4,7 @@
  *   * lifecycleMixin: Vue.prototype的生命周期包装函数
  *   * initLifecycle: vue实例的生命周期包装函数
  *   * callHook: 生命周期调用方法
+ *   * mountComponent: 提供vue.prototype.$mount
  */
 
 /* @flow */
