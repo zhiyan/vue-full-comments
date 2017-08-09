@@ -1,5 +1,6 @@
 /**
  * vnode虚拟dom的类定义
+ * VNode实例本质也只是一个简单对象
  * 以及导出vnode相关几个操作方法:
  */
 
@@ -39,10 +40,19 @@ export default class VNode {
     componentOptions?: VNodeComponentOptions,
     asyncFactory?: Function
   ) {
+    // vnode的tag名称
     this.tag = tag
+
+    // vnode的相关属性,参见: https://cn.vuejs.org/v2/guide/render-function.html#深入data-object参数
     this.data = data
+
+    // vnode的子节点树， array结构
+    // 参见: https://cn.vuejs.org/v2/guide/render-function.html#createElement-参数
     this.children = children
+
+    // vnode的文本
     this.text = text
+
     this.elm = elm
     this.ns = undefined
     this.context = context
@@ -54,8 +64,13 @@ export default class VNode {
     this.raw = false
     this.isStatic = false
     this.isRootInsert = true
+
+    // 是否是空vnode的标记
     this.isComment = false
+
+    // 是否是通过clone VNode而来
     this.isCloned = false
+    
     this.isOnce = false
     this.asyncFactory = asyncFactory
     this.asyncMeta = undefined
@@ -77,7 +92,7 @@ export const createEmptyVNode = (text: string = '') => {
   return node
 }
 
-// 创建文本vnode
+// 创建文本vnode, 文本vnode没有tag
 export function createTextVNode (val: string | number) {
   return new VNode(undefined, undefined, undefined, String(val))
 }
@@ -98,15 +113,20 @@ export function cloneVNode (vnode: VNode): VNode {
     vnode.componentOptions,
     vnode.asyncFactory
   )
+
+  // 同步不能通过构造函数创建实例而建立的属性
   cloned.ns = vnode.ns
   cloned.isStatic = vnode.isStatic
   cloned.key = vnode.key
   cloned.isComment = vnode.isComment
+
+  // 通过cloneVNode创建的vnode设置标记位
   cloned.isCloned = true
   return cloned
 }
 
 // clone一组vnode
+// 循环调用cloneVNode
 export function cloneVNodes (vnodes: Array<VNode>): Array<VNode> {
   const len = vnodes.length
   const res = new Array(len)
