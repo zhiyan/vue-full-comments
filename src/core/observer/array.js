@@ -29,8 +29,12 @@ export const arrayMethods = Object.create(arrayProto)
   // cache original method
   const original = arrayProto[method]
   def(arrayMethods, method, function mutator (...args) {
+    // 先拿到原生的处理结果
     const result = original.apply(this, args)
     const ob = this.__ob__
+
+    // 是否是插入类型的操作
+    // 插入类型的操作对新增加的数据启动observer
     let inserted
     switch (method) {
       case 'push':
