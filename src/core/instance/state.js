@@ -417,6 +417,9 @@ export function stateMixin (Vue: Class<Component>) {
       warn(`$props is readonly.`, this)
     }
   }
+
+  // dataDef, 和propsDef的getter实际返回的是vue实例的_data和_props引用
+  // 所以$data和$props实际只是将内部对象按照约定格式$开头的暴露出来
   Object.defineProperty(Vue.prototype, '$data', dataDef)
   Object.defineProperty(Vue.prototype, '$props', propsDef)
 
