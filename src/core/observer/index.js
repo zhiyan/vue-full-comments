@@ -89,6 +89,9 @@ export class Observer {
 // helpers
 
 /**
+ * 替换target对象的原型链继承
+ * 主要是为了替换被监测的数组的__proto__, 用自定义的可触发update的对象替代
+ * 这样数组在操作时也会触发update操作
  * Augment an target Object or Array by intercepting
  * the prototype chain using __proto__
  */
@@ -99,6 +102,8 @@ function protoAugment (target, src: Object, keys: any) {
 }
 
 /**
+ * 在不支持__proto__的浏览器，挨个将修改过的数组方法加到数组对象上，
+ * 覆盖继承的方法
  * Augment an target Object or Array by defining
  * hidden properties.
  */

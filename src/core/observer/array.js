@@ -1,3 +1,8 @@
+/**
+ * 根据Array.prototype定义一个新的对象，该对象对数组的一系列方法作了修改，能够触发update
+ * 供被监测的数组修改自身原型链对象使用
+ */
+
 /*
  * not type checking this file because flow doesn't play well with
  * dynamically accessing methods on Array prototype
