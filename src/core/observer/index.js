@@ -42,7 +42,11 @@ export class Observer {
 
   constructor (value: any) {
     this.value = value
+    
+    // 每一个observer都对应着一个Dep
+    // 所有obserable的数据都是一个可被收集的依赖
     this.dep = new Dep()
+
     this.vmCount = 0
 
     // 设置对象__ob__为observer实例引用
