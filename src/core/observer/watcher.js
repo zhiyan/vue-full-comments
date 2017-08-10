@@ -112,13 +112,21 @@ export default class Watcher {
   }
 
   /**
+   * 收集依赖并拿到watcher的动态value
    * Evaluate the getter, and re-collect dependencies.
    */
-  // 收集依赖并拿到watcher的动态value
   get () {
+    // 将当前watcher实例设为Dep.target
     pushTarget(this)
     let value
     const vm = this.vm
+
+    // watcher的get方法执行顺序：
+    // 1. 将当前工作的依赖收集器设置为当前watcher, 如果当前有正在工作的依赖收集器，将它push到的队列中
+    // 2. 执行getter方法
+    // 3. 拿到值之后将依赖收集器的队列pop
+    // 
+    // 因为整个过程是同步操作，所以不会产生额外的争夺依赖收集器的问题
     try {
       // 收集依赖执行getter方法
       value = this.getter.call(vm, vm)
@@ -232,6 +240,9 @@ export default class Watcher {
   }
 
   /**
+   * depend是收集依赖的过程
+   * deps属性是当前watcher的依赖数组，数组元素是Dep实例
+   * 此处是对自身依赖的循环收集
    * Depend on all deps collected by this watcher.
    */
   depend () {

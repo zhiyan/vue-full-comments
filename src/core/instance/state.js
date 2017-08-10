@@ -306,11 +306,15 @@ function createComputedGetter (key) {
     const watcher = this._computedWatchers && this._computedWatchers[key]
 
     if (watcher) {
-      // watcher需要脏检查的情况下重新运行evaluate得到值
+      // lazy模式下需要先通过evaluate拿到值
       if (watcher.dirty) {
         // evaluate为lazy模式下取值方式
         watcher.evaluate()
       }
+
+      // 依赖队列，比如computedAttr1中依赖于computedAttr2
+      // 则computedAttr1的getter过程中会触发computedAttr2的getter
+      // computedAttr2将computedAttr1在DepStack入栈，将自己设为Dep.target
       if (Dep.target) {
         watcher.depend()
       }
