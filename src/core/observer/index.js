@@ -186,6 +186,7 @@ export function defineReactive (
       // 有getter方法， 则先通过之前的getter方法拿到值
       const value = getter ? getter.call(obj) : val
       // props和data在get的时候都没有正在执行的watcher, 所以不作任何处理
+      // 用Dep.target来判断是否是别的属性依赖于自己，在收集自己
       if (Dep.target) {
         dep.depend()
         if (childOb) {

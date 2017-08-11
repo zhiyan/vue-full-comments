@@ -5,6 +5,15 @@
 * 保留源文件中英文注释
 * 逐行添加设计思路及语法注释
 
+### vue基本数据的实现核心
+
+* data -> observer
+* props -> observer
+* computed -> watcher
+* watch -> watcher
+* methods -> evaluation(normal function)
+* events -> evaluation(normal function)
+
 ### Q&A
 
 Q. 为什么要划分core/compile/server/platforms

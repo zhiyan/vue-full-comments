@@ -79,6 +79,7 @@ export default class Watcher {
     // watcher状态，是否活跃状态
     this.active = true
 
+    // dirty表明当前数据是不是最新的, true就是非最新，getter时需要收集依赖拿最新的值
     this.dirty = this.lazy // for lazy watchers
     this.deps = []
     this.newDeps = []
@@ -88,11 +89,12 @@ export default class Watcher {
       ? expOrFn.toString()
       : ''
 
-    // 设置实力的getter方法
+    // 设置实例的getter方法
     // parse expression for getter
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
     } else {
+      // 根据watch的表达式拿到对应的属性的getter方法
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
         this.getter = function () {}
@@ -123,7 +125,7 @@ export default class Watcher {
 
     // watcher的get方法执行顺序：
     // 1. 将当前工作的依赖收集器设置为当前watcher, 如果当前有正在工作的依赖收集器，将它push到的队列中
-    // 2. 执行getter方法
+    // 2. 执行getter方法(computed|watch传入的方法)
     // 3. 拿到值之后将依赖收集器的队列pop
     // 
     // 因为整个过程是同步操作，所以不会产生额外的争夺依赖收集器的问题
@@ -149,6 +151,8 @@ export default class Watcher {
   }
 
   /**
+   * watcher增加自身依赖的过程
+   * 同时需要将自身作为订阅者胶乳到依赖的订阅者列表中
    * Add a dependency to this directive.
    */
   addDep (dep: Dep) {
@@ -156,6 +160,9 @@ export default class Watcher {
     if (!this.newDepIds.has(id)) {
       this.newDepIds.add(id)
       this.newDeps.push(dep)
+      // 防止重复增加订阅， 设计了newDeps和deps两个属性
+      // 收集过程中新的依赖只增加到newDeps, 收集完毕后将newDeps加入到deps中
+      // 下次收集, 在deps中已经有的就不会重复订阅
       if (!this.depIds.has(id)) {
         dep.addSub(this)
       }
@@ -163,6 +170,10 @@ export default class Watcher {
   }
 
   /**
+   * 清空依赖收集的队列
+   * 收集变更的情况（包含第一次收集前，依赖deps为[]）
+   * 结束收集后重置deps和newdeps
+   * 将依赖列表更新为最新依赖情况
    * Clean up for dependency collection.
    */
   cleanupDeps () {
@@ -194,6 +205,7 @@ export default class Watcher {
     } else if (this.sync) {
       this.run()
     } else {
+      // 添加到watcher队列
       queueWatcher(this)
     }
   }
@@ -240,9 +252,7 @@ export default class Watcher {
   }
 
   /**
-   * depend是收集依赖的过程
-   * deps属性是当前watcher的依赖数组，数组元素是Dep实例
-   * 此处是对自身依赖的循环收集
+   * 计算属性A依赖于B， 在收集B的过程中， B会把自身的所有依赖加入到A中
    * Depend on all deps collected by this watcher.
    */
   depend () {

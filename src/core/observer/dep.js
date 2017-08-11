@@ -35,9 +35,7 @@ export default class Dep {
     remove(this.subs, sub)
   }
 
-  // 增加依赖：
-  // 如果依赖收集器有正在运行中的watcher
-  // 则将当前dep实例加入watcher的依赖中
+  // 将自己作为依赖加入到当前正在收集自己值得watcher中
   depend () {
     if (Dep.target) {
       Dep.target.addDep(this)
@@ -45,6 +43,7 @@ export default class Dep {
   }
 
   // 通知当前依赖的订阅者更新
+  // watcher会依次加入到watcher队列
   notify () {
     // stabilize the subscriber list first
     const subs = this.subs.slice()

@@ -235,10 +235,16 @@ function getData (data: Function, vm: Component): any {
 }
 
 // 计算属性的watcher是lazy模式的
-// lazy模式的watcher手动调用evaluate来手机依赖并得到值
+// lazy模式的watcher手动调用evaluate来收集依赖并得到值
 const computedWatcherOptions = { lazy: true }
 
 // 初始化计算属性函数
+// 核心是建立watcher, 与watch实现不同的是外加了属性本身的getter
+// 过程:
+// 1. 在vm上建立_computedWatchers数组存储所有计算属性的watcher
+// 2. 根据options.computed建立各个计算属性的watcher
+// 3. 根据options.computed传入的方法或表达式建立getter/setter对象
+// 4. 在getter中调用watcher来收集依赖
 function initComputed (vm: Component, computed: Object) {
   process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'computed')
 
@@ -261,6 +267,7 @@ function initComputed (vm: Component, computed: Object) {
     }
 
     // 计算属性通过watcher来实现
+    // 且watcher的watch对象是一个getter函数
     // create internal watcher for the computed property.
     watchers[key] = new Watcher(vm, getter || noop, noop, computedWatcherOptions)
 
@@ -299,6 +306,8 @@ export function defineComputed (target: any, key: string, userDef: Object | Func
         : userDef.get
       : noop
     // 计算属性对象情况下的setter设置
+    // 计算属性不明确指定set, 则为空函数
+    // 计算属性是由其他属性计算而来，一般不用设置set
     sharedPropertyDefinition.set = userDef.set
       ? userDef.set
       : noop
@@ -337,8 +346,9 @@ function createComputedGetter (key) {
       }
 
       // 依赖队列，比如computedAttr1中依赖于computedAttr2
-      // 则computedAttr1的getter过程中会触发computedAttr2的getter
-      // computedAttr2将computedAttr1在DepStack入栈，将自己设为Dep.target
+      // 此处情况是computedAttr1的getter过程中会触发computedAttr2的getter
+      // 当computedAttr2执行完evaluate后，Dep.target会pop为computedAttr1的watcher
+      // 此时computedAttr2需要将自己依赖的属性加入到computedAttr1的依赖属性中
       if (Dep.target) {
         watcher.depend()
       }
@@ -408,10 +418,14 @@ function createWatcher (
     options = handler
     handler = handler.handler
   }
+
   // 处理watch为字符串情况, 取vm中方法
   if (typeof handler === 'string') {
     handler = vm[handler]
   }
+
+  // $watch在stateMixin中添加的原型链方法
+  // 实际就是新建了一个watcher实例
   return vm.$watch(keyOrFn, handler, options)
 }
 

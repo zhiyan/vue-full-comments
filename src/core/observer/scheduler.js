@@ -33,6 +33,7 @@ function resetSchedulerState () {
 }
 
 /**
+ * 运行watcher队列
  * Flush both queues and run the watchers.
  */
 function flushSchedulerQueue () {
@@ -139,9 +140,13 @@ export function queueWatcher (watcher: Watcher) {
       }
       queue.splice(i + 1, 0, watcher)
     }
+
+    // 已经开始执行，则不重复执行
+    // waitting是标志位
     // queue the flush
     if (!waiting) {
       waiting = true
+      // 添加watcher队列是一个同步操作，所以执行watcher放在队列添加好之后
       nextTick(flushSchedulerQueue)
     }
   }
