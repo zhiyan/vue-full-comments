@@ -7,6 +7,8 @@ import { remove } from '../util/index'
 let uid = 0
 
 /**
+ * 一个依赖实例对应一个observer实例，依赖实例负责管理所有对该observer数据进行订阅的订阅者
+ * 并在observer数据改变时通知订阅者进行update操作
  * A dep is an observable that can have multiple
  * directives subscribing to it.
  */
