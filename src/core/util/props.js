@@ -17,17 +17,28 @@ type PropOptions = {
   validator: ?Function
 };
 
+// 对props做校验
+// propsOptions是代码传的props对象
+// propsData是实际上写入的props值
 export function validateProp (
   key: string,
   propOptions: Object,
   propsData: Object,
   vm?: Component
 ): any {
+  // 该属性的option
   const prop = propOptions[key]
+
+  // 表明是否真正传入了该属性
   const absent = !hasOwn(propsData, key)
+
+  // 传入的值
   let value = propsData[key]
+
+  // props的type是Boolean型
   // handle boolean props
   if (isType(Boolean, prop.type)) {
+    // boolean型不指定默认值，默认false
     if (absent && !hasOwn(prop, 'default')) {
       value = false
     } else if (!isType(String, prop.type) && (value === '' || value === hyphenate(key))) {
@@ -36,6 +47,7 @@ export function validateProp (
   }
   // check default value
   if (value === undefined) {
+    // 拿到指定的默认值
     value = getPropDefaultValue(vm, prop, key)
     // since the default value is a fresh copy,
     // make sure to observe it.
@@ -51,6 +63,7 @@ export function validateProp (
 }
 
 /**
+ * 拿到props的默认value值
  * Get the default value of a prop.
  */
 function getPropDefaultValue (vm: ?Component, prop: PropOptions, key: string): any {

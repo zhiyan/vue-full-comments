@@ -184,6 +184,7 @@ export function defineReactive (
     get: function reactiveGetter () {
       // 有getter方法， 则先通过之前的getter方法拿到值
       const value = getter ? getter.call(obj) : val
+      // props和data在get的时候都没有正在执行的watcher, 所以不作任何处理
       if (Dep.target) {
         dep.depend()
         if (childOb) {
@@ -215,7 +216,7 @@ export function defineReactive (
       // 从新监测新值，是因为新值可能变成一个新的对象, 那么之前的observer就没有了
       childOb = !shallow && observe(newVal)
 
-      // 通知订阅改value的watcher进行update操作
+      // 通知订阅该value的watcher进行update操作
       dep.notify()
     }
   })

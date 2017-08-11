@@ -75,6 +75,9 @@ export function initState (vm: Component) {
   if (opts.data) {
     initData(vm)
   } else {
+    // observe第二个参数表示是否是实例上顶层的data对象， 通过initData调用的observe都需要设为true
+    // 主要是在生成observe实例的时候标记一下vmCount
+    // 多个组件公用一套options,初始化initData后,vmCount就可以看出该组件被初始化的数目
     observe(vm._data = {}, true /* asRootData */)
   }
 
@@ -102,13 +105,23 @@ function checkOptionType (vm: Component, name: string) {
 // 初始化props函数
 function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
+
+  // 将props挂载到vm实例_props
   const props = vm._props = {}
+
+  // 第一次初始化props的时候缓存props的key
+  // props无法动态增加，所以可以缓存起来，数目不会有变更，当update的时候就不用枚举了
   // cache prop keys so that future props updates can iterate using Array
   // instead of dynamic object key enumeration.
   const keys = vm.$options._propKeys = []
+
+  // 判断是否是顶层vm实例
   const isRoot = !vm.$parent
+
+  // 顶层的vm实例的props需要做一次转化
   // root instance props should be converted
   observerState.shouldConvert = isRoot
+
   for (const key in propsOptions) {
     keys.push(key)
     const value = validateProp(key, propsOptions, propsData, vm)
@@ -132,6 +145,8 @@ function initProps (vm: Component, propsOptions: Object) {
         }
       })
     } else {
+      // 没有执行observe，而是直接执行了observe最终调用的defineReactive方法
+      // defineReactive方法设置了属性的getter/setter, 并在getter/setter中启动依赖收集机制
       defineReactive(props, key, value)
     }
 
@@ -147,6 +162,11 @@ function initProps (vm: Component, propsOptions: Object) {
 }
 
 // 初始化数据函数
+// 对data的处理流程:
+// 1. 取options.data
+// 2. 处理options.data(考虑函数情况)，复制给实例_data属性
+// 3. 对_data属性深度遍历，全部使用defineProperty重新定义一遍（保证getter/setter）
+// 4. 对_data的数据生成observe实例, 开启观察者模式
 function initData (vm: Component) {
   // 设置vue._data
   // 如果options.data是对象，直接赋值，如果是函数，执行getData方法
@@ -324,6 +344,7 @@ function createComputedGetter (key) {
 }
 
 // 初始化methods函数
+// methods的处理比较简单，只是将methods挨个赋到vm实例上，作为实例方法
 function initMethods (vm: Component, methods: Object) {
   process.env.NODE_ENV !== 'production' && checkOptionType(vm, 'methods')
   const props = vm.$options.props
