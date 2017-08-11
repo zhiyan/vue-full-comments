@@ -124,7 +124,11 @@ function initProps (vm: Component, propsOptions: Object) {
 
   for (const key in propsOptions) {
     keys.push(key)
+
+    // validateProp主要对props的值进行了检查，如果没有赋值，根据option是否有默认值进行了处理,
+    // 并且如果在处理过程中重新赋了值，对新赋的值进行了observe
     const value = validateProp(key, propsOptions, propsData, vm)
+
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
       if (isReservedAttribute(key) || config.isReservedAttr(key)) {

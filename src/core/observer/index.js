@@ -16,6 +16,7 @@ import {
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
 /**
+ * observerState是一个全局对象，只有shouldConvert为false, 才会在observe属性时新建一个ovserver实例
  * By default, when a reactive property is set, the new value is
  * also converted to become reactive. However when passing down props,
  * we don't want to force conversion because the value may be a nested value
