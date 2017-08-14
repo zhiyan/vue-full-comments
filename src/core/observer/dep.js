@@ -35,7 +35,7 @@ export default class Dep {
     remove(this.subs, sub)
   }
 
-  // 将自己作为依赖加入到当前正在收集自己值得watcher中
+  // 将自己作为依赖加入到当前正在收集自己的watcher中
   depend () {
     if (Dep.target) {
       Dep.target.addDep(this)

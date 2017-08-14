@@ -152,7 +152,7 @@ export default class Watcher {
 
   /**
    * watcher增加自身依赖的过程
-   * 同时需要将自身作为订阅者胶乳到依赖的订阅者列表中
+   * 同时需要将自身作为订阅者加入到依赖的订阅者列表中
    * Add a dependency to this directive.
    */
   addDep (dep: Dep) {
