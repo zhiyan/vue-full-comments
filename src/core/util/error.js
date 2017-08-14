@@ -1,3 +1,7 @@
+/**
+ * 错误处理
+ */
+
 /* @flow */
 
 import config from '../config'

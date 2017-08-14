@@ -4,9 +4,12 @@
 import { noop } from 'shared/util'
 import { handleError } from './error'
 
+// 对象是否可读取__proto__
 // can we use __proto__?
 export const hasProto = '__proto__' in {}
 
+// 如果有window对象，则是浏览器环境
+// ua相关检测, 浏览器判断
 // Browser environment sniffing
 export const inBrowser = typeof window !== 'undefined'
 export const UA = inBrowser && window.navigator.userAgent.toLowerCase()
