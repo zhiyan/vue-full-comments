@@ -26,6 +26,7 @@ import {
   validateProp
 } from '../util/index'
 
+// 正在进行操作的vm实例, 属于公共资源
 export let activeInstance: any = null
 export let isUpdatingChildComponent: boolean = false
 
@@ -84,6 +85,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
     activeInstance = vm
     vm._vnode = vnode
 
+    // 对比更新
+    // vm.__patch__方法在入口文件中定义，根据渲染平台的不同而有不同的实现
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
     if (!prevVnode) {
@@ -248,6 +251,8 @@ export function mountComponent (
   } else {
     // 设置更新组建函数
     updateComponent = () => {
+      // vm._render() 拿到最新的VNode
+      // update 进行具体的patch操作
       vm._update(vm._render(), hydrating)
     }
   }
@@ -380,6 +385,8 @@ export function deactivateChildComponent (vm: Component, direct?: boolean) {
 // @param hook 调用的生命周期名称
 // 生命周期方法都存于组件的$options中
 export function callHook (vm: Component, hook: string) {
+
+  // 从$options中拿到指定的句柄
   const handlers = vm.$options[hook]
 
   // 循环执行周期函数句柄, options[lifecycleName]是一个数组
