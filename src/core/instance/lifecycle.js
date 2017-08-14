@@ -339,6 +339,7 @@ function isInInactiveTree (vm) {
   return false
 }
 
+// 向外提供调用组件activated钩子
 export function activateChildComponent (vm: Component, direct?: boolean) {
   if (direct) {
     vm._directInactive = false
@@ -357,6 +358,7 @@ export function activateChildComponent (vm: Component, direct?: boolean) {
   }
 }
 
+// 向外提供调用组件deactivated钩子
 export function deactivateChildComponent (vm: Component, direct?: boolean) {
   if (direct) {
     vm._directInactive = true

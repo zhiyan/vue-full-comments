@@ -211,11 +211,14 @@ export default class Watcher {
   }
 
   /**
+   * watcher队列调度执行时，每个执行的watcher实际执行的方法
    * Scheduler job interface.
    * Will be called by the scheduler.
    */
   run () {
+    // 只有active激活状态的watcher才执行
     if (this.active) {
+      // 重新通过getter拿到值
       const value = this.get()
       if (
         value !== this.value ||
@@ -227,7 +230,11 @@ export default class Watcher {
       ) {
         // set new value
         const oldValue = this.value
+
+        // 重新赋值
         this.value = value
+
+        // 执行构造watcher时传入的回调函数
         if (this.user) {
           try {
             this.cb.call(this.vm, value, oldValue)
@@ -267,6 +274,8 @@ export default class Watcher {
    */
   teardown () {
     if (this.active) {
+      // 如果vm实例已经开始卸载，就不需要在执行watcher移除操作
+      // 卸载过程会统一处理watcher数组
       // remove self from vm's watcher list
       // this is a somewhat expensive operation so we skip it
       // if the vm is being destroyed.
