@@ -257,7 +257,7 @@ export function mountComponent (
     }
   }
 
-  // 对实例开启watcher, 回调设置为updateComponent
+  // 对实例开启watcher
   vm._watcher = new Watcher(vm, updateComponent, noop)
   hydrating = false
 

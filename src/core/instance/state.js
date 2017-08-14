@@ -43,7 +43,9 @@ const sharedPropertyDefinition = {
 }
 
 
+// 代理访问_props和_data
 // 使用Object.defineProperty重新定义属性, 设置get/set过程
+// 代理访问vm[key] -> vm._props[key] || vm._data[key]
 export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
@@ -154,7 +156,7 @@ function initProps (vm: Component, propsOptions: Object) {
       defineReactive(props, key, value)
     }
 
-    // proxy定义_props
+    // 代理访问, 静态的props不用代理
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
