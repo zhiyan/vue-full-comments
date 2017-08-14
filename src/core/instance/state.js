@@ -481,6 +481,9 @@ export function stateMixin (Vue: Class<Component>) {
       return createWatcher(vm, expOrFn, cb, options)
     }
     options = options || {}
+
+    // options.watch和$watch时，options.user=true
+    // computed的watcher实例options.user=false
     options.user = true
     // 创建一个watcher, 参数: vm实例，key, 回调函数,options
     const watcher = new Watcher(vm, expOrFn, cb, options)
