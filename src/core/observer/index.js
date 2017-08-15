@@ -284,6 +284,7 @@ export function del (target: Array<any> | Object, key: any) {
 }
 
 /**
+ * 如果收集依赖过程遇到收集数组， 则遍历数组的元素，挨个作为被收集的依赖加入到依赖中去
  * Collect dependencies on array elements when the array is touched, since
  * we cannot intercept array element access like property getters.
  */
